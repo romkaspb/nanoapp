@@ -1,0 +1,1 @@
+$redis_messages = Redis.new
