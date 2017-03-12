@@ -1,4 +1,5 @@
 class ApiKey < ApplicationRecord
+  require 'jwt'
   self.primary_key = 'access_token'
 
   belongs_to :user

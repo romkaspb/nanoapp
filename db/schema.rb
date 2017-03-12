@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170309200950) do
+ActiveRecord::Schema.define(version: 20170311113423) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -18,7 +18,6 @@ ActiveRecord::Schema.define(version: 20170309200950) do
   create_table "api_keys", id: false, force: :cascade do |t|
     t.integer  "user_id"
     t.string   "access_token"
-    t.string   "scope"
     t.datetime "expires_at"
     t.datetime "last_access"
     t.datetime "created_at"
@@ -28,22 +27,46 @@ ActiveRecord::Schema.define(version: 20170309200950) do
   end
 
   create_table "messages", force: :cascade do |t|
-    t.integer  "user_id"
+    t.integer  "sender_id"
+    t.integer  "recipient_id"
+    t.integer  "messenger_id"
     t.text     "body"
-    t.string   "recipient"
-    t.integer  "recipient_messager_cd"
-    t.boolean  "sended"
-    t.datetime "created_at",            null: false
-    t.datetime "updated_at",            null: false
-    t.index ["recipient"], name: "index_messages_on_recipient", using: :btree
-    t.index ["user_id", "sended"], name: "index_messages_on_user_id_and_sended", using: :btree
-    t.index ["user_id"], name: "index_messages_on_user_id", using: :btree
+    t.integer  "status_cd",             default: 0
+    t.integer  "failed_delivery_count", default: 0
+    t.datetime "delivered_at"
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
+    t.index ["messenger_id"], name: "index_messages_on_messenger_id", using: :btree
+    t.index ["recipient_id"], name: "index_messages_on_recipient_id", using: :btree
+    t.index ["sender_id", "recipient_id"], name: "index_messages_on_sender_id_and_recipient_id", using: :btree
+    t.index ["sender_id"], name: "index_messages_on_sender_id", using: :btree
+  end
+
+  create_table "messengers", force: :cascade do |t|
+    t.string   "name"
+    t.string   "type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "user_identifiers", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "messenger_id"
+    t.string   "identifier"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+    t.index ["messenger_id"], name: "index_user_identifiers_on_messenger_id", using: :btree
+    t.index ["user_id", "messenger_id"], name: "index_user_identifiers_on_user_id_and_messenger_id", unique: true, using: :btree
+    t.index ["user_id"], name: "index_user_identifiers_on_user_id", using: :btree
   end
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string   "email"
+    t.string   "password_digest"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+    t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
   end
 
   add_foreign_key "api_keys", "users"

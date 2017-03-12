@@ -11,7 +11,7 @@ class ApiController < ActionController::API
     api_key = ApiKey.where(access_token: token).first
 
     if api_key && !api_key.is_expired? && !api_key.locked
-      @current_user = api_key.student
+      @current_user = api_key.user
       @current_user.current_api_key = api_key
     else
       return nil

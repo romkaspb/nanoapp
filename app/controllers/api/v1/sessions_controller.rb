@@ -1,10 +1,12 @@
-class Api::V1::SessionController < Api::V1Controller
+class Api::V1::SessionsController < Api::V1Controller
+  skip_before_action :ensure_authenticated_user
+
   def create
     user = User.where('email = ?', params[:email]).first
 
     if user
       if user.authenticate(params[:password])
-        api_key = user.find_api_key
+        api_key = ApiKey.find_or_create_by(user_id: user.id)
 
         if !api_key.locked
           api_key.last_access = Time.now
