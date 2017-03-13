@@ -7,14 +7,15 @@ class Api::V1::MessagesController < Api::V1Controller
 			message = Message.new( parameters.merge({ messenger_id: messenger_id }) )
 			message.sender = @current_user
 			if message.valid?
+				message.save
 				@messages << @message
 			else
 				return render_error message.errors.full_messages.first
 			end
 		end
 
-		HandleMessageJob.perform_later( @current_user, @messages )
-		head :ok
+		HandleMessageJob.perform_later( @messages )
+		head :created
 	end
 
 	private

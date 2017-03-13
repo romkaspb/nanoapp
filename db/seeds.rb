@@ -27,4 +27,4 @@ ApiKey.create(
 	user: User.find(1)
 )
 
-%w(Vider Telegram).map{|m| Messenger.create(name: m)}
+%w(Viber Telegram).map{|m| Object.const_get("Messenger::#{m}").create(name: m )}

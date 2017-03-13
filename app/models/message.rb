@@ -5,14 +5,14 @@ class Message < ApplicationRecord
 
 	belongs_to :messenger
 	belongs_to :sender, class_name: 'User'
-	belongs_to :reciver, class_name: 'User'
+	belongs_to :recipient, class_name: 'User'
 
-	validates :messenger, :sender, :reciver, presence: true
+	validates :messenger, :sender, :recipient, presence: true
 	validate :prevent_dublicate
 	validate :recipient_has_such_messenger
 
 	def prevent_dublicate
-		unless Message.where( sender: sender, recipient: reciver, messenger: messenger ).select(:body).limit(1).order(:created_at).first.eql?(body)
+		if Message.where( sender: sender, recipient: recipient, messenger: messenger ).select(:body).last.body.eql?(body)
 			errors.add(:body, "Dublicate message")
 		end
 	end
@@ -24,14 +24,18 @@ class Message < ApplicationRecord
 	end
 
 	def deliver
+		return if self.delivered?
+
 		if messenger.class.send_message
-			status = :delivered
-			touch :deliveried_at
+			self.status = :delivered
+			self.delivered_at = Time.now
+			self.failed_delivery_count = 0
 		else
-			status = :failed
-			increment(:failed_delivery_count)
+			self.status = :failed
+			self.failed_delivery_count ||= 0
+			self.failed_delivery_count += 1
 		end
 
-		save
+		self.save
 	end
 end

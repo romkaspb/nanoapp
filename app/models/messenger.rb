@@ -3,7 +3,7 @@ class Messenger < ApplicationRecord
 
 	# method will be redefined in inherited models
 	def self.send_message
-		logger.debug( "Message was sent via #{self.class}" )
+		logger.debug( "Message was sent via #{self.name}" )
 		# simple hack to check delivered\not delivered message
 		rand(0..1) == 0 ? false : true
 	end

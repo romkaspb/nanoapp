@@ -3,7 +3,7 @@ class HandleMessageJob < ApplicationJob
 
   def perform(messages)
     messages.each do |message|
-    	delivery_at = message.delete(:delivery_at)
+    	delivery_at = message.delivery_at
 
     	if message.save
     		if delivery_at.present? and delivered_at.to_datetime
